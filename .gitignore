@@ -10,3 +10,9 @@ wheels/
 .venv
 
 .DS_Store
+
+.idea/
+.vscode/
+.ruff_cache/
+.uv-cache/
+.env

@@ -19,3 +19,20 @@ dependencies = [
 
 [project.scripts]
 astr = "astrbot_sdk.cli:cli"
+
+
+[tool.ruff]
+line-length = 88
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "PLR5501", "UP"]
+ignore = []
+
+[tool.ruff.lint.isort]
+force-sort-within-sections = true
+combine-as-imports = true
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
