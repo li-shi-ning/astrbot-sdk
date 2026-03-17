@@ -1,0 +1,10 @@
+_schema_version: 2
+name: interface_coverage_plugin
+display_name: Interface Coverage Plugin
+desc: 覆盖 AstrBot SDK 常用接口的测试插件
+author: codex
+version: 0.1.0
+runtime:
+  python: "3.12"
+components:
+  - class: main:InterfaceCoveragePlugin
