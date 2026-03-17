@@ -137,6 +137,53 @@ async def test_plugin_harness_supports_metadata_and_http_commands() -> None:
 
 
 @pytest.mark.asyncio
+async def test_plugin_harness_v4_fixture_covers_most_interfaces() -> None:
+    from astrbot_sdk.runtime._streaming import StreamExecution
+    from astrbot_sdk.testing import LocalRuntimeConfig, PluginHarness
+
+    plugin_dir = _repo_root() / "test_plugin" / "new"
+
+    async with PluginHarness(LocalRuntimeConfig(plugin_dir=plugin_dir)) as harness:
+        plugin_info_records = await harness.dispatch_text("plugin_info")
+        remember_records = await harness.dispatch_text("remember")
+        db_records = await harness.dispatch_text("db")
+        stream_records = await harness.dispatch_text("stream")
+        ping_records = await harness.dispatch_text("ping")
+        join_records = await harness.dispatch_text("", event_type="group_join")
+        api_records = await harness.dispatch_text("register_api")
+        unreg_records = await harness.dispatch_text("unregister_api")
+
+        echo_result = await harness.invoke_capability(
+            "capability.demo.echo",
+            {"text": "fixture"},
+        )
+        stream_exec = await harness.invoke_capability(
+            "capability.demo.stream",
+            {"text": "abc"},
+            stream=True,
+        )
+
+        assert isinstance(stream_exec, StreamExecution)
+        chunks = [item async for item in stream_exec.iterator]
+        stream_final = stream_exec.finalize(chunks)
+
+    assert any(
+        "name=astrbot_plugin_v4demo" in (r.text or "") for r in plugin_info_records
+    )
+    assert any("remembered=local-user" in (r.text or "") for r in remember_records)
+    assert any("value1={" in (r.text or "") for r in db_records)
+    assert any("[完成] Echo: stream" in (r.text or "") for r in stream_records)
+    assert any((r.text or "") == "pong" for r in ping_records)
+    assert any("欢迎 local-user 加入群组!" in (r.text or "") for r in join_records)
+    assert any("已注册 API" in (r.text or "") for r in api_records)
+    assert any((r.text or "") == "已注销 API" for r in unreg_records)
+    assert echo_result == {"echo": "fixture", "plugin_id": "astrbot_plugin_v4demo"}
+    assert chunks == [{"text": "a"}, {"text": "b"}, {"text": "c"}]
+    assert stream_final == {"items": [{"text": "a"}, {"text": "b"}, {"text": "c"}]}
+    assert harness.router.db.get("demo:started") is None
+
+
+@pytest.mark.asyncio
 async def test_example_hello_plugin_dispatches_commands() -> None:
     from astrbot_sdk.testing import PluginHarness
 
