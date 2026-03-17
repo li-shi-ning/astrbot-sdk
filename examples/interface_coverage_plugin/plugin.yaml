@@ -1,0 +1,9 @@
+name: interface_coverage_plugin
+display_name: Interface Coverage Plugin
+desc: 覆盖 SDK 常见接口的综合示例插件
+author: codex
+version: 0.1.0
+runtime:
+  python: "3.12"
+components:
+  - class: main:InterfaceCoveragePlugin
